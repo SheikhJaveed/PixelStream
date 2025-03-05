@@ -1,7 +1,10 @@
 import mongoose, {Schema} from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
+import dotenv from "dotenv";
+dotenv.config({
+    path: "./.env"
+});
 /**
   User schema 
     users [icon: user] {
@@ -70,14 +73,14 @@ const userSchema = new Schema({
 
 //"save" is an inbuilt mongoose middleware that is called before saving the document to the database
 userSchema.pre("save",async function(next){
-    if(this.modified("password")) return next(); //if the password is not modified, then skip this middleware
+    if(this.isModified("password")) return next(); //if the password is not modified, then skip this middleware
     
-    this.password = bcrypt.hash(this.password, 10); //hashing the password before saving it to the database and 10 is the number of rounds of hashing
+    this.password = await bcrypt.hash(this.password, 10); //hashing the password before saving it to the database and 10 is the number of rounds of hashing
     next();
 })
 
 userSchema.methods.isPasswordCorrect = async function(password){
-    bcrypt.compare(password, this.password); //comparing the password with the hashed password
+    return await bcrypt.compare(password, this.password); //comparing the password with the hashed password
 }
 
 //access token generation
