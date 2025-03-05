@@ -1,4 +1,6 @@
 import mongoose, {Schema} from "mongoose";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 /**
   User schema 
@@ -63,4 +65,38 @@ const userSchema = new Schema({
 }, {timestamps: true});
 //timestamps: true will automatically add the createdAt and updatedAt fields to the document
 
+
+/** Middleware to encrypt the password */
+
+//"save" is an inbuilt mongoose middleware that is called before saving the document to the database
+userSchema.pre("save",async function(next){
+    if(this.modified("password")) return next(); //if the password is not modified, then skip this middleware
+    
+    this.password = bcrypt.hash(this.password, 10); //hashing the password before saving it to the database and 10 is the number of rounds of hashing
+    next();
+})
+
+userSchema.methods.isPasswordCorrect = async function(password){
+    bcrypt.compare(password, this.password); //comparing the password with the hashed password
+}
+
+//access token generation
+userSchema.methods.generateAccessToken = function(){
+    //short lived access time
+    return jwt.sign(
+     {
+        _id: this._id,
+        email: this.email,
+        username: this.username,
+        fullname: this.fullname
+     }   , process.env.ACCESS_TOKEN_SECRET, {expiresIn: process.env.ACCESS_TOKEN_EXPIRY});
+};
+
+userSchema.methods.generateRefreshToken = function(){
+    //long lived access token
+    return jwt.sign(
+     {
+        _id: this._id
+     }   , process.env.REFRESH_TOKEN_SECRET, {expiresIn: process.env.REFRESH_TOKEN_EXPIRY});
+};
 export const User = mongoose.model("User", userSchema); //mongoose will create a collection called "users" in the database
