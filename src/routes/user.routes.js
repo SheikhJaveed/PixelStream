@@ -1,6 +1,6 @@
 import { Router as Route } from "express";
 
-import { registerUser, logoutUser, loginUser, refreshAccessToken, updateAccountDetails, updateUserAvatar, updateCoverImage, getWatchHistory } from "../controllers/user.controllers.js";
+import { registerUser,changeCurrentPassword, logout, loginUser, refreshAccessToken, updateAccountDetails, updateUserAvatar, updateCoverImage, getWatchHistory ,getCurrentUser,getUserChannelProfile} from "../controllers/user.controllers.js";
 import { upload } from "../middlewares/multer.middlewares.js";
 import { verifyJWT } from "../middlewares/auth.middlewares.js";
 
@@ -30,10 +30,10 @@ router.route("/refreshToken").post(refreshAccessToken);
 
 //secured routes -> accessble only if the user is logged in
 
-router.route("/logout").post(verifyJWT,logoutUser);
-router.route("/change-password").post(verifyJWT,changePassword);
+router.route("/logout").post(verifyJWT,logout);
+router.route("/change-password").post(verifyJWT,changeCurrentPassword);
 router.route("/current-user").get(verifyJWT,getCurrentUser);
-router.route("/channels/:username").get(verifyJWT,getChannel);
+router.route("/channels/:username").get(verifyJWT,getUserChannelProfile);
 router.route("/update-account").patch(verifyJWT,updateAccountDetails);
 router.route("/update-avatar").patch(verifyJWT,upload.single("avatar"),updateUserAvatar); //upload.single("avatar")  to upload a single file with the field name "avatar"
 router.route("/update-cover-image").patch(verifyJWT,upload.single("coverImage"),updateCoverImage); //upload.single("coverImage")  to upload a single file with the field name "coverImage"

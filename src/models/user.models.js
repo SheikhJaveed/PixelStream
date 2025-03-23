@@ -72,16 +72,16 @@ const userSchema = new Schema({
 /** Middleware to encrypt the password */
 
 //"save" is an inbuilt mongoose middleware that is called before saving the document to the database
-userSchema.pre("save",async function(next){
-    if(this.isModified("password")) return next(); //if the password is not modified, then skip this middleware
-    
-    this.password = await bcrypt.hash(this.password, 10); //hashing the password before saving it to the database and 10 is the number of rounds of hashing
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next(); // Skip if password not modified
+    this.password = await bcrypt.hash(this.password, 10); // Hash the password
     next();
-})
+});
 
-userSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password, this.password); //comparing the password with the hashed password
-}
+userSchema.methods.isPasswordCorrect = async function (password) {
+    console.log("Comparison result:", result);
+    return result;
+};
 
 //access token generation
 userSchema.methods.generateAccessToken = function(){
